@@ -1,0 +1,95 @@
+# Copyright 2018 VMware, Inc.
+# SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-only
+#
+# Variables file for deploying NSX-T Cluster
+#
+{
+
+  #
+  # Common NSX Appliance variables
+  #
+  "nsx_username": "admin",
+  "nsx_password": "VMware1!VMware1!",
+  "validate_certs": False,
+  "state": "present",
+
+  #
+  # OVA/OVF Information. Path can be on local file system or a HTTP URL
+  #
+  "nsx_ova_path": "http://192.168.110.10",
+#  "nsx_ova": "nsx-unified-appliance-3.0.0.0.0.15946739.ova",
+  "nsx_ova": "nsx-unified-appliance-3.0.2.0.0.16887203.ova",
+
+  #
+  # Common network details. This assumes all NSX appliance nodes are on the
+  # same subnet. If there is a need to deploy NSX appliance nodes which are
+  # on different subnets, add node specific details in the blocks below and
+  # use them in the playbooks instead.
+  #
+  "domain": "corp.local",
+  "netmask": "255.255.255.0",
+  "gateway": "192.168.110.1",
+  "dns_server": "192.168.110.10",
+  "ntp_server": "192.168.100.1",
+
+  #
+  # First NSX appliance node. Defined separate based on the consumption.
+  # Accepts both IP (IPv4) and FQDN for 'mgmt_ip'
+  #
+  "nsx_node1": {
+    "hostname": "nsxmgr-01a",
+    "mgmt_ip": "192.168.110.15",
+    "datacenter": "Site-A",
+    "cluster": "Cluster-02a",
+    "datastore": "esx-03a-local",
+    "portgroup": "SiteA-vDS-02-Mgmt"
+  },
+
+  #
+  # Additional nodes defined as an array so that its easier to iterate
+  # through them in the playbook.
+  #
+  "additional_nodes": [
+    {
+      "hostname": "nsxmgr-02a",
+      "mgmt_ip": "192.168.110.16",
+      "prefix": "24",
+      "datacenter": "Site-A",
+      "cluster": "Cluster-02a",
+      "datastore": "esx-04a-local",
+      "portgroup": "SiteA-vDS-02-Mgmt"
+    },
+    {
+      "hostname": "nsxmgr-03a",
+      "mgmt_ip": "192.168.110.17",
+      "prefix": "24",
+      "datacenter": "Site-A",
+      "cluster": "Cluster-02a",
+      "datastore": "esx-04a-local",
+      "portgroup": "SiteA-vDS-02-Mgmt"
+    }
+  ],
+
+  #
+  # One or more compute managers that have to be registered with NSX
+  #
+  "compute_managers": [
+    {
+      "display_name": "vcsa-01a",
+      "mgmt_ip": "192.168.110.22",
+      "origin_type": "vCenter",
+      "credential_type": "UsernamePasswordLoginCredential",
+      "username": "administrator@vsphere.local",
+      "password": "VMware1!"
+    }
+  ],
+
+  #
+  # NSX-T licenses
+  #
+  "nsxt_licenses": [
+    {
+      "license_key": "012CQ-JNJ40-T8KDT-0732H-24V30"
+    }
+  ],
+}

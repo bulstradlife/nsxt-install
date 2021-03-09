@@ -1,0 +1,388 @@
+# Copyright 2018 VMware, Inc.
+# SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-only
+#
+#
+# Variables file for Day-0/1 setup
+# Creates the following:
+#   - 2 Transport Zones
+#   - 1 IP Pool (used by Edge)
+#   - 1 Transport Node Profile with 2 TZ endpoints
+#   - 2 Edge Transport Nodes
+#   - 2 ESX Host Transport Nodes
+#   - 1 Edge Cluster with the 2 Edge Nodes
+#
+{
+
+  #
+  # Flag to create or delete all the objects
+  # Accepts: 'present' to create; 'absent' to delete
+  #
+  "state": "present",
+
+  #
+  # Common NSX Appliance variables
+  #
+  "nsx_username": "admin",
+  "nsx_password": "VMware1!VMware1!",
+  "validate_certs": False,
+
+  #
+  # First NSX appliance node. Defined separate based on the consumption.
+  # Accepts both IP (IPv4) and FQDN for 'mgmt_ip'
+  #
+  "nsx_node1": {
+    "hostname": "nsxmgr-01a",
+    "mgmt_ip": "192.168.110.15",
+    "datacenter": "Site-A",
+    "cluster": "Cluster-02a",
+    "datastore": "esx-03a-local",
+    "portgroup": "SiteA-vDS-02-Mgmt"
+  },
+
+  "transport_zones": [
+    {
+      "display_name": "sdc-edge-vlan-tz",
+      "description": "SDC Edge VLAN Transport Zone",
+      "transport_type": "VLAN",
+      "host_switch_name": "nvds"
+    },
+    {
+      "display_name": "pdc-edge-vlan-tz",
+      "description": "PDC Edge VLAN Transport Zone",
+      "transport_type": "VLAN",
+      "host_switch_name": "nvds"
+    }
+  ],
+
+  "ip_pools": [
+    {
+      "display_name": "sdc-tep-ip-pool",
+      "pool_static_subnets": [
+        {
+          "display_name": "SDC TEP_ip_pool_subnet",
+          "state": "present",
+          "allocation_ranges": [
+            {
+              "start": "10.174.8.2",
+              "end": "10.174.8.254"
+            }
+          ],
+          "gateway_ip": "10.174.8.1",
+          "cidr": "10.174.8.0/24"
+        }
+      ]
+    },
+    {
+      "display_name": "pdc-tep-ip-pool",
+      "pool_static_subnets": [
+        {
+          "display_name": "PDC TEP_ip_pool_subnet",
+          "state": "present",
+          "allocation_ranges": [
+            {
+              "start": "10.174.136.2",
+              "end": "10.174.136.254"
+            }
+          ],
+          "gateway_ip": "10.174.136.1",
+          "cidr": "10.174.136.0/24"
+        }
+      ]
+    }
+  ],
+
+  "uplink_profiles": [
+    {
+      "display_name": "sdc-lag-uplink-hostswitch-profile",
+      "teaming": {
+        "active_list": [
+          {
+            "uplink_name": "uplink-1",
+            "uplink_type": "PNIC"
+          }
+        ],
+        "policy": "FAILOVER_ORDER"
+      },
+      "transport_vlan": 2010,
+      "named_teamings": []
+    },
+    {
+      "display_name": "pdc-lag-uplink-hostswitch-profile",
+      "teaming": {
+        "active_list": [
+          {
+            "uplink_name": "uplink-1",
+            "uplink_type": "PNIC"
+          }
+        ],
+        "policy": "FAILOVER_ORDER"
+      },
+      "transport_vlan": 3010,
+      "named_teamings": []
+    },
+    {
+      "display_name": "sdc-loadbalance-uplink-edge-profile",
+      "teaming": {
+        "active_list": [
+          {
+            "uplink_name": "uplink-1",
+            "uplink_type": "PNIC"
+          },
+          {
+            "uplink_name": "uplink-2",
+            "uplink_type": "PNIC"
+          }
+        ],
+        "policy": "LOADBALANCE_SRCID"
+      },
+      "named_teamings" : [
+        {
+          "name": "uplink-left",
+          "active_list": [
+            {
+              "uplink_name": "uplink-1",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        },
+        {
+          "name": "uplink-right",
+          "active_list": [
+            {
+              "uplink_name": "uplink-2",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        }
+      ],
+      "transport_vlan": 2010
+    },
+    {
+      "display_name": "pdc-loadbalance-uplink-edge-profile",
+      "teaming": {
+        "active_list": [
+          {
+            "uplink_name": "uplink-1",
+            "uplink_type": "PNIC"
+          },
+          {
+            "uplink_name": "uplink-2",
+            "uplink_type": "PNIC"
+          }
+        ],
+        "policy": "LOADBALANCE_SRCID"
+      },
+      "named_teamings" : [
+        {
+          "name": "uplink-left",
+          "active_list": [
+            {
+              "uplink_name": "uplink-1",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        },
+        {
+          "name": "uplink-right",
+          "active_list": [
+            {
+              "uplink_name": "uplink-2",
+              "uplink_type": "PNIC"
+            }
+          ],
+          "policy": "FAILOVER_ORDER"
+        }
+      ],
+      "transport_vlan": 3010
+    }
+  ],
+
+  "transport_node_profiles": [
+    {
+      "display_name": "sdc-comp01-transport-node-profile",
+      "description": "SDC Compute Transport Node Profile",
+      "host_switches": [
+        {
+
+          "host_switch_name": "SiteA-vDS-01",
+          "host_switch_id": "50 2f 54 67 b9 67 80 8b-2e 25 c8 80 9e 41 b3 44",
+          "host_switch_type": "VDS",
+          "host_switch_mode": "STANDARD",
+          "host_switch_profiles": [
+            {
+              "name": "sdc-lag-uplink-hostswitch-profile",
+              "type": "UplinkHostSwitchProfile"
+            }
+          ],
+          "pnics": [],
+          "uplinks": [
+            {
+              "vds_uplink_name": "Uplink 1",
+              "uplink_name": "uplink-1"
+            }
+          ],
+          "ip_assignment_spec": {
+              "resource_type": "StaticIpPoolSpec",
+              "ip_pool_name": "sdc-tep-ip-pool"
+          },
+          "transport_zone_endpoints": [
+            {
+              "transport_zone_name": "nsx-overlay-transportzone"
+            }
+          ]
+        }
+      ],
+      "transport_zone_endpoints": []
+    },
+    {
+      "display_name": "pdc-comp01-transport-node-profile",
+      "description": "PDC Compute Transport Node Profile",
+      "host_switches": [
+        {
+
+          "host_switch_name": "SiteA-vDS-02",
+          "host_switch_id": "50 2f 3e e3 1e ad 11 75-de 68 1b 2a 2c ab 8b f3",
+          "host_switch_type": "VDS",
+          "host_switch_mode": "STANDARD",
+          "host_switch_profiles": [
+            {
+              "name": "pdc-lag-uplink-hostswitch-profile",
+              "type": "UplinkHostSwitchProfile"
+            }
+          ],
+          "pnics": [],
+          "uplinks": [
+            {
+                    "vds_uplink_name": "Uplink 1",
+              "uplink_name": "uplink-1"
+            }
+          ],
+          "ip_assignment_spec": {
+              "resource_type": "StaticIpPoolSpec",
+              "ip_pool_name": "pdc-tep-ip-pool"
+          },
+          "transport_zone_endpoints": [
+            {
+              "transport_zone_name": "nsx-overlay-transportzone"
+            }
+          ]
+        }
+      ],
+      "transport_zone_endpoints": []
+    }
+  ],
+
+
+  "transport_node_collections": [
+    {
+      "state": "present",
+      "display_name": "sdc-comp01-collection",
+      "description": "TNP for sdc-comp01",
+      "resource_type": "TransportNodeCollection",
+      "compute_manager_name": "vcsa-01a",
+      "cluster_name": "Cluster-01",
+      "transport_node_profile_name": "sdc-comp01-transport-node-profile"
+    }
+  ],
+
+  "transport_nodes": [
+    {
+      "display_name": "sdc-edge01",
+      "description": "SDC Edge Node 01",
+      "host_switches": [
+        {
+          "host_switch_name": "nvds",
+          "host_switch_type": "NVDS",
+          "host_switch_mode": "STANDARD",
+          "host_switch_profiles": [
+            {
+              "name": "sdc-loadbalance-uplink-edge-profile",
+              "type": "UplinkHostSwitchProfile"
+            }
+          ],
+          "pnics": [
+            {
+              "device_name": "fp-eth0",
+              "uplink_name": "uplink-1"
+            },
+            {
+              "device_name": "fp-eth1",
+              "uplink_name": "uplink-2"
+            }
+          ],
+          "ip_assignment_spec":
+            {
+              "resource_type": "StaticIpPoolSpec",
+              "ip_pool_name": "sdc-tep-ip-pool"
+            },
+          "transport_zone_endpoints": [
+            {
+              "transport_zone_name": "nsx-overlay-transportzone"
+            },
+            {
+              "transport_zone_name": "sdc-edge-vlan-tz"
+            }
+
+          ]
+        }
+      ],
+      "transport_zone_endpoints": [],
+      "node_deployment_info": {
+        "deployment_type": "VIRTUAL_MACHINE",
+        "deployment_config": {
+          "form_factor": "SMALL",
+          "vm_deployment_config": {
+            "vc_name": "vcsa-01a",
+            "vc_username": "administrator@vsphere.local",
+            "vc_password": "VMware1!",
+            "storage": "esx-03a-local",
+            "compute": "Cluster-02a",
+            "data_networks": [
+              "nsxt-edge-trunk-1",
+              "nsxt-edge-trunk-2",
+              "nsxt-edge-trunk-1"
+            ],
+            "default_gateway_addresses": [ "10.174.0.1" ],
+            "management_network": "SiteA-vDS-02-Mgmt",
+            "management_port_subnets": [
+              {
+                "ip_addresses": [ "10.174.1.19" ],
+                "prefix_length": 23
+              }
+            ],
+            "placement_type": "VsphereDeploymentConfig"
+          },
+          "node_user_settings": {
+            "cli_username": "admin" ,
+            "root_password": "VMware1!Vmware1!",
+            "cli_password": "VMware1!Vmware1!",
+            "audit_username": "audit",
+            "audit_password": "VMware1!Vmware1!",
+          }
+        },
+        "node_settings": {
+          "allow_ssh_root_login": "True",
+          "enable_ssh": "True",
+          "hostname": "sdc-edge01.infra.bulstradlife.bg"
+        },
+        "resource_type": "EdgeNode",
+        "display_name": "sdc-edge01"
+      }
+    }
+   ],
+
+  "edge_clusters": [
+    {
+      "display_name": "Edge-Cluster-01",
+      "cluster_profile_bindings": [
+        { "profile_name": "nsx-default-edge-high-availability-profile" }
+      ],
+      "members": [
+        { "transport_node_name": "EdgeNode-01" }
+      ]
+    }
+  ]
+}
