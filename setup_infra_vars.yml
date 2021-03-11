@@ -44,13 +44,21 @@
       "display_name": "sdc-edge-vlan-tz",
       "description": "SDC Edge VLAN Transport Zone",
       "transport_type": "VLAN",
-      "host_switch_name": "nvds"
+      "host_switch_name": "nvds",
+      "uplink_teaming_policy_names": [
+        "uplink-left",
+        "uplink-right"
+      ]
     },
     {
       "display_name": "pdc-edge-vlan-tz",
       "description": "PDC Edge VLAN Transport Zone",
       "transport_type": "VLAN",
-      "host_switch_name": "nvds"
+      "host_switch_name": "nvds",
+      "uplink_teaming_policy_names": [
+        "uplink-left",
+        "uplink-right"
+      ]
     }
   ],
 
@@ -91,7 +99,7 @@
     }
   ],
 
-  "uplink_profiles": [
+  "host_uplink_profiles": [
     {
       "display_name": "sdc-lag-uplink-hostswitch-profile",
       "teaming": {
@@ -119,7 +127,10 @@
       },
       "transport_vlan": 3010,
       "named_teamings": []
-    },
+    }
+  ],
+  
+  "edge_uplink_profiles": [
     {
       "display_name": "sdc-loadbalance-uplink-edge-profile",
       "teaming": {
@@ -157,7 +168,8 @@
           "policy": "FAILOVER_ORDER"
         }
       ],
-      "transport_vlan": 2010
+      "transport_vlan": 2010,
+      "mtu": 9000
     },
     {
       "display_name": "pdc-loadbalance-uplink-edge-profile",
@@ -196,7 +208,8 @@
           "policy": "FAILOVER_ORDER"
         }
       ],
-      "transport_vlan": 3010
+      "transport_vlan": 3010,
+      "mtu": 9000
     }
   ],
 

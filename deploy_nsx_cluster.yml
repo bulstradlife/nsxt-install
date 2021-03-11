@@ -1,0 +1,6 @@
+---
+- import_playbook: 01_deploy_first_node.yml
+- import_playbook: 02_configure_compute_manager.yml
+- import_playbook: 03_deploy_second_third_node.yml
+- import_playbook: 04_add_nsx_license.yml
+

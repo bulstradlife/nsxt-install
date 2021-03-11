@@ -18,6 +18,7 @@
         description: "{{ item.description }}"
         transport_type: "{{ item.transport_type }}"
         host_switch_name: "{{ item.host_switch_name }}"
+        uplink_teaming_policy_names: "{{item.uplink_teaming_policy_names}}"
         state: "{{ state }}"
       with_items:
         - "{{ transport_zones }}"

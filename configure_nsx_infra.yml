@@ -1,0 +1,7 @@
+---
+- import_playbook: 05_create_host_uplink_profiles.yml
+- import_playbook: 06_create_edge_uplink_profiles.yml
+- import_playbook: 07_setup_transport_zones.yml
+- import_playbook: 08_setup_TEP_IP_Pools.yml
+- import_playbook: 09_setup_transport_node_profiles.yml
+
