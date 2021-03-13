@@ -358,12 +358,12 @@
               "nsxt-edge-trunk-2",
               "nsxt-edge-trunk-1"
             ],
-            "default_gateway_addresses": [ "10.174.0.1" ],
+            "default_gateway_addresses": [ "192.168.110.1" ],
             "management_network": "SiteA-vDS-02-Mgmt",
             "management_port_subnets": [
               {
-                "ip_addresses": [ "10.174.1.19" ],
-                "prefix_length": 23
+                "ip_addresses": [ "192.168.110.18" ],
+                "prefix_length": 24
               }
             ],
             "placement_type": "VsphereDeploymentConfig"
@@ -384,17 +384,101 @@
         "resource_type": "EdgeNode",
         "display_name": "sdc-edge01"
       }
-    }
+    },
+    {
+      "display_name": "sdc-edge02",
+      "description": "SDC Edge Node 02",
+      "host_switches": [
+        {
+          "host_switch_name": "nvds",
+          "host_switch_type": "NVDS",
+          "host_switch_mode": "STANDARD",
+          "host_switch_profiles": [
+            {
+              "name": "sdc-loadbalance-uplink-edge-profile",
+              "type": "UplinkHostSwitchProfile"
+            }
+          ],
+          "pnics": [
+            {
+              "device_name": "fp-eth0",
+              "uplink_name": "uplink-1"
+            },
+            {
+              "device_name": "fp-eth1",
+              "uplink_name": "uplink-2"
+            }
+          ],
+          "ip_assignment_spec":
+            {
+              "resource_type": "StaticIpPoolSpec",
+              "ip_pool_name": "sdc-tep-ip-pool"
+            },
+          "transport_zone_endpoints": [
+            {
+              "transport_zone_name": "nsx-overlay-transportzone"
+            },
+            {
+              "transport_zone_name": "sdc-edge-vlan-tz"
+            }
+
+          ]
+        }
+      ],
+      "transport_zone_endpoints": [],
+      "node_deployment_info": {
+        "deployment_type": "VIRTUAL_MACHINE",
+        "deployment_config": {
+          "form_factor": "SMALL",
+          "vm_deployment_config": {
+            "vc_name": "vcsa-01a",
+            "vc_username": "administrator@vsphere.local",
+            "vc_password": "VMware1!",
+            "storage": "esx-04a-local",
+            "compute": "Cluster-02a",
+            "data_networks": [
+              "nsxt-edge-trunk-1",
+              "nsxt-edge-trunk-2",
+              "nsxt-edge-trunk-1"
+            ],
+            "default_gateway_addresses": [ "192.168.110.1" ],
+            "management_network": "SiteA-vDS-02-Mgmt",
+            "management_port_subnets": [
+              {
+                "ip_addresses": [ "192.168.110.19" ],
+                "prefix_length": 24
+              }
+            ],
+            "placement_type": "VsphereDeploymentConfig"
+          },
+          "node_user_settings": {
+            "cli_username": "admin" ,
+            "root_password": "VMware1!Vmware1!",
+            "cli_password": "VMware1!Vmware1!",
+            "audit_username": "audit",
+            "audit_password": "VMware1!Vmware1!",
+          }
+        },
+        "node_settings": {
+          "allow_ssh_root_login": "True",
+          "enable_ssh": "True",
+          "hostname": "sdc-edge02.infra.bulstradlife.bg"
+        },
+        "resource_type": "EdgeNode",
+        "display_name": "sdc-edge02"
+      }
+     }
    ],
 
   "edge_clusters": [
     {
-      "display_name": "Edge-Cluster-01",
+      "display_name": "sdc-edge-cluster-01",
       "cluster_profile_bindings": [
         { "profile_name": "nsx-default-edge-high-availability-profile" }
       ],
       "members": [
-        { "transport_node_name": "EdgeNode-01" }
+        { "transport_node_name": "sdc-edge01" },
+        { "transport_node_name": "sdc-edge02" }
       ]
     }
   ]
